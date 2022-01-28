@@ -41,24 +41,31 @@ class Service
             ]);
 
         } catch (\Throwable $th) {
-            Session::flash('error', "Ошибка!");
-            return response()->json($th);
+            return Session::flash('error', "Временно не доступно, попробуйте позже...");
         }
     }
 
     // remove
     public function delete($id)
     {
-        Link::find($id)->delete();
-        Session::flash('info', "Успешно удалено!");
+        try {
+            Link::find($id)->delete();
+            return Session::flash('info', "Успешно удалено!");
+        } catch (\Throwable $th) {
+            return Session::flash('error', "Временно не доступно, попробуйте позже...");
+        }
     }
 
     public function redirect($link)
     {
-        $http = 'http://';
-        if($_SERVER['APP_URL'][5] == 's') $http = 'https://';  
-        $data = Link::where('generate_link', $http.$_SERVER['HTTP_HOST'].'/'.$link)->first();
-        return $data->default_link;
+        try {
+            $http = 'http://';
+            if($_SERVER['APP_URL'][5] == 's') $http = 'https://';  
+            $data = Link::where('generate_link', $http.$_SERVER['HTTP_HOST'].'/'.$link)->first();
+            return $data->default_link;
+        } catch (\Throwable $th) {
+            return Session::flash('error', "Временно не доступно, попробуйте позже...");
+        }
     }
 
     // Сокращаем ссылку
